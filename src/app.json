@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "^pages/books/main"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "wx",
+    "navigationBarTextStyle": "light"
+  }
+}

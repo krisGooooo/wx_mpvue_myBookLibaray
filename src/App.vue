@@ -1,12 +1,16 @@
 <script>
-export default {
-  created() {
-    // 调用API从本地缓存中获取数据
-    const logs = wx.getStorageSync('logs') || [];
-    logs.unshift(Date.now());
-    wx.setStorageSync('logs', logs);
+import { get } from './util';
 
-    console.log('app created and cache logs by setStorageSync');
+export default {
+  //  async await 异步编程解决方案
+  async created() {
+    // 调用API从本地缓存中获取数据
+    // const logs = wx.getStorageSync('logs') || [];
+    // logs.unshift(Date.now());
+    // wx.setStorageSync('logs', logs);
+    const res = await get('/weapp/demo');
+    console.log(123, res);
+    console.log('启动了小程序');
   },
 };
 </script>

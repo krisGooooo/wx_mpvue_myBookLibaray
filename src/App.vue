@@ -1,15 +1,11 @@
 <script>
 import { get } from './util';
+import qcloud from 'wafer2-client-sdk'
+import config from './config'
 
 export default {
   //  async await 异步编程解决方案
   async created() {
-    // 调用API从本地缓存中获取数据
-    // const logs = wx.getStorageSync('logs') || [];
-    // logs.unshift(Date.now());
-    // wx.setStorageSync('logs', logs);
-    const res = await get('/weapp/demo');
-    console.log(123, res);
     console.log('启动了小程序');
   },
 };
@@ -24,6 +20,20 @@ export default {
   justify-content: space-between;
   padding: 200rpx 0;
   box-sizing: border-box;
+}
+.btn {
+  color: white;
+  background: #EA5A49;
+  margin-bottom: 10px;
+  padding-left: 15px;
+  border-radius: 2px;
+  font-size: 16px;
+  line-height: 40px;
+  height: 40px;
+  width: 100%;
+}
+.btn:active {
+  background: #FA5A49;
 }
 /* this rule will be remove */
 * {

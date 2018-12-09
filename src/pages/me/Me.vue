@@ -4,20 +4,20 @@
       <img :src="userinfo.avatarUrl" alt="">
       <p>{{userinfo.nickName}}</p>
     </div>
-    <!-- <YearProgress></YearProgress> -->
+    <YearProgress></YearProgress>
     <button v-if='userinfo.openId' @click='scanBook' class='btn'>添加图书</button>
     <button v-else open-type="getUserInfo" lang="zh_CN" class='btn' @getuserinfo="login">点击登录</button>
   </div>
 </template>
 <script>
 import qcloud from 'wafer2-client-sdk'
-// import YearProgress from '@/components/YearProgress'
+import YearProgress from '@/components/YearProgress'
 import {showSuccess} from '@/util'
 import config from '@/config'
 export default {
-//   components: {
-//     YearProgress
-//   },
+  components: {
+    YearProgress
+  },
   data () {
     return {
       userinfo: {

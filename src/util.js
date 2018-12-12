@@ -33,13 +33,20 @@ function request(url, method, data){
       url: config.host + url,
       success(res) {
         if (res.data.code === 0) {
-          console.log(res.data)
           resolve(res.data.data);
         } else {
-          console.log(1)
+          showModal('失败', res.data.data.msg)
           reject(res.data);
         }
       },
     });
   });
+}
+
+export function showModal(title, content){
+  wx.showModal({
+    title,
+    content,
+    showCancel: false
+  })
 }

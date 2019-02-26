@@ -19,9 +19,15 @@ export default {
     },
     methods:{
         async getList(){
+            wx.showNavigationBarLoading()
             const book = await get('/weapp/booklist')
             this.books = book.list
+            wx.stopPullDownRefresh()
+            wx.hideNavigationBarLoading()
         }
+    },
+    onPullDownRefresh(){
+        this.getList()
     },
     mounted(){
         this.getList()

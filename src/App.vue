@@ -12,6 +12,9 @@ export default {
 </script>
 
 <style>
+.text-primary{
+  color: #EA5149;
+}
 .container {
   height: 100%;
   display: flex;

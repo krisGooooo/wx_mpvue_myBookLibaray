@@ -1,15 +1,39 @@
 <template>
   <div class="book-card">
     <div class="thumb">
-      <img :src="book.image" class="image">
+      <img :src="book.image" 
+            class="img"
+            mode="aspectFit"
+            />
     </div>
     <div class="detail">
-      <div class="right">
-        {{book.rate}}
+      <div class="row">
+        <div class="right">
+          {{book.rate}}
+        </div>
+        <div class="left">
+          {{book.title}}
+        </div>
       </div>
-      <div class="left">
-        {{book.title}}
+      <div class="row">
+        <div class="right">
+          浏览量:
+        </div>
+        <div class="left">
+          <!-- {{book.title}} -->
+          {{book.author}}
+        </div>
       </div>
+      <div class="row">
+        <div class="right">
+          添加人:
+        </div>
+        <div class="left">
+          <!-- {{book.title}} -->
+          {{book.publisher}}
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -21,7 +45,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.book-card{
+  padding: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 14px;
+  .thumb{
+    width: 90px;
+    height: 90px;
+    float: left;
+    overflow: hidden;
+    margin: 0 auto;
+    .img{
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+  .detail{
+    margin-left: 100px;
+    .row{
+      line-height: 20px;
+      margin-bottom: 3px;
+    }
+    .right{
+      float: right;
+    }
+    .left{
+      margin-right: 80px;
+    }
+  }
+}
 </style>
 
 

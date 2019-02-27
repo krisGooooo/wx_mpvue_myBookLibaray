@@ -1,3 +1,10 @@
+<!--
+ * @Author: krisGooooo
+ * @Description: 
+ * @Date: 2019-02-26 20:11:14
+ * @LastEditors: krisGooooo
+ * @LastEditTime: 2019-02-27 19:07:24
+ -->
 <template>
   <div class="rate">
     <span>☆☆☆☆☆</span>

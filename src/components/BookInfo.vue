@@ -46,13 +46,14 @@
 </template>
 <script>
 import Rate from '@/components/Rate'
+
 export default {
-  components:{
+  components: {
     Rate
   },
-  props:['info'],
-  computed:{
-    userinfo(){
+  props: ['info'],
+  computed: {
+    userinfo () {
       return this.info.user_info || {}
     }
   }

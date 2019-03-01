@@ -14,7 +14,7 @@
     "dev": "node build/dev-server.js wx",
     "start": "npm run dev",
     "build": "node build/build.js wx",
-    "lint": "eslint --fix --ext .js,.vue src"
+    "lint": "eslint --fix --ext .js,.vue src server/controllers"
   },
   "dependencies": {
     "mpvue": "^1.0.11",
@@ -36,12 +36,15 @@
     "cssnano": "^3.10.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-standard": "^12.0.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-import-resolver-webpack": "^0.9.0",
     "eslint-loader": "^2.0.0",
     "eslint-plugin-html": "^4.0.3",
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
     "eventsource-polyfill": "^0.9.6",
     "express": "^4.16.3",
     "extract-text-webpack-plugin": "^3.0.2",

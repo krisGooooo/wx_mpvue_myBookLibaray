@@ -3,7 +3,7 @@
  * @Description: 
  * @Date: 2018-12-18 21:45:30
  * @LastEditors: krisGooooo
- * @LastEditTime: 2019-02-27 20:39:44
+ * @LastEditTime: 2019-03-01 11:58:26
  -->
 <template>
   <a :href="detailUrl">
@@ -50,18 +50,19 @@
 
 <script>
 import Rate from '@/components/Rate'
+
 export default {
-  components:{
+  components: {
     Rate
   },
-  props:['book'],
-  computed:{
-    detailUrl(){
-      return '/pages/detail/main?id=' + this.book.id
+  props: ['book'],
+  computed: {
+    detailUrl () {
+      return `/pages/detail/main?id=${this.book.id}`
     }
   },
-  methods:{
-    preview(){
+  methods: {
+    preview () {
       wx.previewImage({
         current: this.book.image,
         urls: [this.book.image]

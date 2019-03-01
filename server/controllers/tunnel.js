@@ -19,6 +19,7 @@ const connectedTunnelIds = []
 const $broadcast = (type, content) => {
     tunnel.broadcast(connectedTunnelIds, type, content)
         .then(result => {
+            /* eslint-disable */
             const invalidTunnelIds = result.data && result.data.invalidTunnelIds || []
 
             if (invalidTunnelIds.length) {

@@ -12,8 +12,9 @@
 <script>
 import qcloud from 'wafer2-client-sdk'
 import YearProgress from '@/components/YearProgress'
-import {showSuccess, post, showModal} from '@/util'
+import { post, showModal } from '@/util'
 import config from '@/config'
+
 export default {
   components: {
     YearProgress
@@ -27,12 +28,12 @@ export default {
     }
   },
   methods: {
-    async addBook(isbn) {
+    async addBook (isbn) {
       const res = await post('/weapp/addbook', {
         isbn,
-        openid:this.userinfo.openId
+        openid: this.userinfo.openId
       })
-      showModal('添加成功',`${res.title}添加成功`)
+      showModal('添加成功', `${res.title}添加成功`)
     },
     scanBook () {
       wx.scanCode({
@@ -61,21 +62,21 @@ export default {
       const session = qcloud.Session.get()
       if (session) {
         qcloud.loginWithCode({
-          success: res => {
+          success: (res) => {
             console.log('没过期的登录', res)
             this.loginSuccess(res)
           },
-          fail: err => {
+          fail: (err) => {
             console.error(err)
           }
         })
       } else {
         qcloud.login({
-          success: res => {
+          success: (res) => {
             console.log('登录成功', res)
             this.loginSuccess(res)
           },
-          fail: err => {
+          fail: (err) => {
             console.error(err)
           }
         })
@@ -84,7 +85,7 @@ export default {
   },
   onShow () {
     wx.showShareMenu()
-    let userinfo = wx.getStorageSync('userinfo')
+    const userinfo = wx.getStorageSync('userinfo')
     if (userinfo) {
       this.userinfo = userinfo
     }

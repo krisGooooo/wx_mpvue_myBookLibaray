@@ -3,13 +3,13 @@
  * @Description: 
  * @Date: 2019-02-27 18:34:41
  * @LastEditors: krisGooooo
- * @LastEditTime: 2019-03-01 00:08:48
+ * @LastEditTime: 2019-03-01 12:19:49
  -->
 <template>
   <div>
     <BookInfo :info="info"></BookInfo>
     <CommentList :comments="comments"></CommentList>
-    <div class="comment">
+    <div class="comment" v-if="showAdd">
       <textarea v-model="comment"
                 class="textarea"
                 :maxlength="100"
@@ -29,79 +29,96 @@
         评论
       </button>
     </div>
+    <div v-else class="text-footer">
+      未登录或已评论
+    </div>
+    <button class="btn" open-type="share">
+      转发给好友
+    </button>
   </div>
 </template>
 <script>
-import {get,post,showModal} from '@/util'
+import { get, post, showModal } from '@/util'
 import BookInfo from '@/components/BookInfo'
 import CommentList from '@/components/CommentList'
 
 export default {
-  components:{
+  components: {
     BookInfo,
     CommentList
   },
-  data(){
-    return{
+  data () {
+    return {
       bookid: '',
       info: {},
       comment: '',
       location: '',
       phone: '',
-      userinfo: {}
+      userinfo: {},
+      comments: []
     }
   },
-  methods:{
-    async addComment(){
+  computed: {
+    showAdd () {
+      if (!this.userinfo.openId) {
+        return false
+      }
+      if (this.comments.filter(v => v.openid === this.userinfo.openId).length) {
+        return false
+      }
+      return true
+    }
+  },
+  methods: {
+    async addComment () {
       if (!this.comment) {
-        return   
+        return
       }
       const data = {
         openid: this.userinfo.openId,
         bookid: this.bookid,
         comment: this.comment,
         phone: this.phone,
-        location: this.location,
-        comments: []
+        location: this.location
       }
-      try{
+      try {
         await post('/weapp/addcomment', data)
         this.comment = ''
-      } catch(e){
-        showModal('失败',e.msg)
+        this.getComments()
+      } catch (e) {
+        showModal('失败', e.msg)
       }
-      console.log(data);
-      
+      console.log(data)
     },
-    async getDetail(){
-      const info = await get('/weapp/bookdetail',{id : this.bookid})
+    async getDetail () {
+      const info = await get('/weapp/bookdetail', { id: this.bookid })
       wx.setNavigationBarTitle({
         title: info.title
       })
       this.info = info
     },
-    async getComments(){
-      const comments = await get('/weapp/commentlist',{bookid: this.bookid})
-      this.comments = comments;
+    async getComments () {
+      const comments = await get('/weapp/commentlist', { bookid: this.bookid })
+      this.comments = comments.list || []
     },
-    getGeo(e){
+    getGeo (e) {
       // sbDkbxiNZeOTOw8da0qlceLOfyv899OE
       const ak = 'sbDkbxiNZeOTOw8da0qlceLOfyv899OE'
-      let url = 'http://api.map.baidu.com/geocoder/v2/'
-      if(e.target.value){
+      const url = 'http://api.map.baidu.com/geocoder/v2/'
+      if (e.target.value) {
         wx.getLocation({
-          success: geo => {
+          success: (geo) => {
             wx.request({
               url,
-              data:{
+              data: {
                 location: `${geo.latitude},${geo.longitude}`,
                 output: 'json',
                 ak
               },
-              success: res => {
-                if(res.data.status === 0){
+              success: (res) => {
+                if (res.data.status === 0) {
                   this.location = res.data.result.addressComponent.city
-                }else{
+                } else {
                   this.location = '未知地点'
                   // console.log('')
                 }
@@ -109,27 +126,33 @@ export default {
             })
           }
         })
-      }else{
+      } else {
         this.location = ''
       }
     },
-    getPhone(e){
-      if(e.target.value){
+    getPhone (e) {
+      if (e.target.value) {
         const phoneInfo = wx.getSystemInfoSync()
         this.phone = phoneInfo.model
-      }else{
+      } else {
         this.phone = ''
       }
-    },
+    }
 
   },
-  mounted(){
+  mounted () {
     this.bookid = this.$root.$mp.query.id
     this.getDetail()
     this.getComments()
+    wx.showShareMenu()
     const userinfo = wx.getStorageSync('userinfo')
-    if(userinfo){
+    if (userinfo) {
       this.userinfo = userinfo
+    }
+  },
+  onShareAppMessage () {
+    return {
+      title: '沃德图书'
     }
   }
 }

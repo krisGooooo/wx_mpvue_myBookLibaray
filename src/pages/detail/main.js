@@ -1,6 +1,5 @@
-import Vue from 'vue';
-import Detail from './Detail';
+import Vue from 'vue'
+import Detail from './Detail'
 
-
-const app = new Vue(Detail);
-app.$mount();
+const app = new Vue(Detail)
+app.$mount()

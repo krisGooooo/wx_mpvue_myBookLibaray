@@ -1,14 +1,10 @@
 <script>
-import { get } from './util';
-import qcloud from 'wafer2-client-sdk'
-import config from './config'
-
 export default {
   //  async await 异步编程解决方案
-  async created() {
-    console.log('启动了小程序');
-  },
-};
+  async created () {
+    console.log('启动了小程序')
+  }
+}
 </script>
 
 <style>
@@ -19,6 +15,15 @@ export default {
 }
 .text-primary{
   color: #EA5149;
+}
+.page-title{
+  padding-left: 20px;
+  background: #eee;
+  line-height: 40px;
+  font-size: 14px;
+}
+.right{
+  float: right;
 }
 .container {
   height: 100%;

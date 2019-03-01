@@ -5,6 +5,7 @@
     </div>
     <div class="comment"
           v-for="comment in comments"
+          @click="handleClick(comment)"
           :key="comment.id">
       <div class="user">
         <div class="inline">
@@ -29,9 +30,18 @@
 </template>
 <script>
 export default {
-  props: ['comments'],
+  props: ['comments', 'type'],
   mounted () {
     console.log('comments', this.comments)
+  },
+  methods: {
+    handleClick (comment) {
+      if (this.type === 'user') {
+        wx.navigateTo({
+          url: '/pages/detail/main?id=' + comment.bookid
+        })
+      }
+    }
   }
 }
 </script>

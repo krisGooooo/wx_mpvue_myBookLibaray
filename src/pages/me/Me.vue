@@ -7,27 +7,37 @@
     <YearProgress></YearProgress>
     <button v-if='userinfo.openId' @click='scanBook' class='btn'>添加图书</button>
     <button v-else open-type="getUserInfo" lang="zh_CN" class='btn' @getuserinfo="login">点击登录</button>
+    <button @click='goWeather' class='btn'>看看天气</button>
+
   </div>
 </template>
 <script>
 import qcloud from 'wafer2-client-sdk'
 import YearProgress from '@/components/YearProgress'
+import HeaderBar from '@/components/HeaderBar'
 import { post, showModal } from '@/util'
 import config from '@/config'
 
 export default {
   components: {
-    YearProgress
+    YearProgress,
+    HeaderBar
   },
   data () {
     return {
       userinfo: {
         avatarUrl: 'http://image.shengxinjing.cn/rate/unlogin.png',
         nickName: ''
-      }
+      },
+      paddingTop: ''
     }
   },
   methods: {
+    goWeather(){
+      wx.navigateTo({
+        url: '/pages/weather/main'
+      })
+    },
     async addBook (isbn) {
       const res = await post('/weapp/addbook', {
         isbn,
@@ -89,6 +99,13 @@ export default {
     if (userinfo) {
       this.userinfo = userinfo
     }
+  },
+  mounted(){
+    wx.getSystemInfo({
+      success: (res) => {
+        this.paddingTop = res.statusBarHeight + 12
+      }
+    })
   }
 }
 </script>
@@ -96,7 +113,6 @@ export default {
 <style lang='scss'>
 .container{
   padding:0 30rpx;
-
 }  
 .userinfo{
   margin-top:100rpx;

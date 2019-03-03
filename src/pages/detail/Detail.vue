@@ -3,7 +3,7 @@
  * @Description: 
  * @Date: 2019-02-27 18:34:41
  * @LastEditors: krisGooooo
- * @LastEditTime: 2019-03-01 12:19:49
+ * @LastEditTime: 2019-03-03 19:25:10
  -->
 <template>
   <div>
@@ -118,6 +118,8 @@ export default {
               success: (res) => {
                 if (res.data.status === 0) {
                   this.location = res.data.result.addressComponent.city
+                  console.log(res)
+
                 } else {
                   this.location = '未知地点'
                   // console.log('')

@@ -1,12 +1,15 @@
 <template>
-  <text :class="'icon ' + 'icon-' + type + ' ' + otherType">
-
-  </text>
+  <img :src="imgurl">
 </template>
 
 <script>
 export default {
   props:['type', 'otherType'],
+  computed:{
+    imgurl() {
+      return require(`../images/${this.type}.png`)
+    }
+  },
   data(){
     return{
 
@@ -25,6 +28,10 @@ export default {
 @font-face {
   font-family: "weather";
   src: url("./weather.ttf") format("truetype");
+}
+img{
+  width: 36rpx;
+  height: 36rpx;
 }
 .navigator {
   font-size: 28rpx;

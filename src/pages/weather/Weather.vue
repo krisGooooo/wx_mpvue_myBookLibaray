@@ -5,7 +5,7 @@
       <view class="now">
         <!--当前实时天气和空气质量-->
         <view class="location" @click="chooseLocation">
-          <Icon type="dingwei" otherType="location"></Icon>
+          <!-- <Icon type="dingwei" otherType="location"></Icon> -->
           <text>{{ formatted_address }}</text>
         </view>
         <view class="air-quality" v-if="air.aqi">
@@ -14,17 +14,18 @@
         </view>
         <view class="now-weather">
           <view class="temp">
-            <text>{{ current.temp }}</text>
+            <text>{{ now.tmp }}</text>
             <text class="degree">°</text>
           </view>
           <view class="cur-weather">
             <view class="inline">
-              <Icon :type="current.icon" otherType="cur-weather"></Icon>
-              <text>{{ current.weather }}</text>
+              <!-- <Icon :type="now.cond_code" otherType="cur-weather"></Icon> -->
+              <img :src="now.image">
+              <text>{{ now.cond_txt }}</text>
             </view>
             <view class="inline today">
-              <text class="item">{{ humidityData }}</text>
-              <text class="item">{{ windData }}</text>
+              <text class="item">{{ '湿度 ' + now.hum + '%' }}</text>
+              <text class="item">{{ now.wind_dir + ' '  + now.wind_sc + '级'}}</text>
             </view>
           </view>
           <view class="tips" v-if="tips">
@@ -37,21 +38,24 @@
         <view class="item">
           <view class="top">
             <text class="date">今天</text>
-            <text class="temp">{{ today.temp }}</text>
+            <text class="temp">{{ today.tmp_min + '/' + today.tmp_max + '°'}}</text>
           </view>
           <view class="bottom">
-            <text>{{ today.weather }}</text>
-            <Icon :type="today.icon" otherType="two-days"></Icon>
+            <text>{{ today.cond_txt_n }}</text>
+            <img :src="today.image">
+            <!-- <Icon :type="today.cond_code_n"></Icon> -->
           </view>
         </view>
         <view class="item">
           <view class="top">
             <text class="date">明天</text>
-            <text class="temp">{{ tomorrow.temp }}</text>
+            <text class="temp">{{ tomorrow.tmp_min + '/' + tomorrow.tmp_max + '°' }}</text>
           </view>
           <view class="bottom">
-            <text>{{ tomorrow.weather }}</text>
-            <Icon :type="tomorrow.icon" otherType="two-days"></Icon>
+            <text>{{ tomorrow.cond_txt_n }}</text>
+            <img :src="tomorrow.image">
+
+            <!-- <Icon :type="tomorrow.icon" otherType="two-days"></Icon> -->
           </view>
         </view>
       </view>
@@ -61,10 +65,11 @@
         <!--24 小时天气-->
         <scroll-view scroll-x class="hourly">
           <view class="scrollX">
-            <view class="item" v-for="(item, index) in hourlyData" :key="index">
+            <view class="item" v-for="(item, index) in hourly" :key="index">
               <text class="time">{{ item.time }}</text>
-              <Icon :type="item.icon" otherType="hourly"></Icon>
-              <text class="temp">{{item.temp}}°</text>
+              <!-- <Icon :type="item.icon" otherType="hourly"></Icon> -->
+              <img :src="item.image">
+              <text class="temp">{{item.tmp}}°</text>
             </view>
           </view>
         </scroll-view>
@@ -78,16 +83,19 @@
                 <view class="date">{{ item.formatDate }}</view>
                 <view class="daytime">
                   <view class="wt">{{item.day}}</view>
-                  <Icon :type="item.dayIcon" otherType="week"></Icon>
+                  <!-- <Icon :type="item.dayIcon" otherType="week"></Icon> -->
                 </view>
                 <view class="night">
-                  <Icon :type="item.nightIcon" otherType="week"></Icon>
+                  <!-- <Icon :type="item.nightIcon" otherType="week"></Icon> -->
                   <view class="wt">{{item.night}}</view>
                 </view>
                 <view class="wind">{{ item.formatNightWind }}</view>
                 <view class="wind" v-if="item.nightWind">{{ item.formatNightWindLevel }}</view>
                 <view class="wind" v-else></view>
               </view>
+            </view>
+            <view class="week-chart">
+              <canvas canvas-id="chart" id="chart"></canvas>
             </view>
         </view>
       </view>
@@ -96,7 +104,7 @@
           <!--生活指数-->
           <view class="item" v-for="(item, index) in lifeStyle" :key="index" @click="indexDetail">
             <view class="title">
-              <Icon :type="item.icon" otherType="life-style"></Icon>
+              <!-- <Icon :type="item.icon" otherType="life-style"></Icon> -->
               {{item.name}}
             </view>
             <view class="content">{{item.info}}</view>
@@ -108,6 +116,9 @@
 </template>
 <script>
 import Icon from '@/components/Icon.vue'
+import { log } from 'util';
+// import {fixChart, getChartConfig, drawEffect} from '@/lib/utils'
+// import Chart from '@/lib/chartjs/chart'
 
 export default {
   components:{
@@ -121,11 +132,9 @@ export default {
       return this.wind(this.current.wind, this.current.windLevel)
     },
     rendWeeklyData() {
-      return this.weeklyData.map((item, index) => {
+      return this.daily_forecast.map((item, index) => {
         item.formatDay = this.formatWeeklyDate(index);
-        item.formatDate = this.formatDate(item.time);
-        item.formatNightWind = this.wind(item.nightWind);
-        item.formatNightWindLevel = this.windLevel(item.nightWindLevel);
+        item.formatDate = this.formatDate(item.date);
         return item;
       });
     }
@@ -135,6 +144,37 @@ export default {
     this.getLocation()
   },
   methods:{
+    // drawChart() {
+    //   const {width, scale, weeklyData} = this.data
+    //   let height = CHART_CANVAS_HEIGHT * scale
+    //   let ctx = wx.createCanvasContext('chart')
+    //   fixChart(ctx, width, height)
+
+    //   // 添加温度
+    //   Chart.pluginService.register({
+    //     afterDatasetsDraw(e, t) {
+    //       ctx.setTextAlign('center')
+    //       ctx.setTextBaseline('middle')
+    //       ctx.setFontSize(16)
+
+    //       e.data.datasets.forEach((t, a) => {
+    //         let r = e.getDatasetMeta(a)
+    //         r.hidden ||
+    //           r.data.forEach((e, r) => {
+    //             // 昨天的数据发灰
+    //             ctx.setFillStyle(r === 0 ? '#e0e0e0' : '#ffffff')
+    //             // 增加温度符号
+    //             let i = t.data[r].toString() + '\xb0'
+    //             let o = e.tooltipPosition()
+    //             // 计算文字位置
+    //             0 == a ? ctx.fillText(i, o.x + 2, o.y - 8 - 10) : 1 == a && ctx.fillText(i, o.x + 2, o.y + 8 + 10)
+    //           })
+    //       })
+    //     }
+    //   })
+
+    //   return new Chart(ctx, getChartConfig(weeklyData))
+    // },
     backHome() {
       wx.reLaunch({
         url: '../index/index',
@@ -145,8 +185,73 @@ export default {
         delta: 1
       })
     },
-    getWeatherData (){
+    chooseLocation() {
+      wx.chooseLocation({
+        success: (res) => {
+          let {latitude, longitude} = res
+          this.latitude = latitude
+          this.longitude = longitude
+          this.getLocation(res)
+          this.getWeatherData()
 
+        }
+      })
+    },
+    getWeatherData (){
+      const key = '91d2a3a94c4b42cab67b71f798c2e494'
+      const url = 'https://free-api.heweather.net/s6/weather'
+      wx.request({
+        url,
+        data: {
+          location: `${this.latitude},${this.longitude}`,
+          key,
+          unit: 'm'
+        },
+        success: (res) => {
+          console.log(res)
+          this.render(res.data.HeWeather6[0])
+        }
+      })
+    },
+    render(data){
+      const {hourly, basic, daily_forecast, lifestyle, now} = data
+      this.hourly = hourly
+      this.hourly.forEach(e => {
+        e.time = e.time.slice(10)
+        e.image = require("../../images/" + e.cond_code + '.png')
+      })
+      this.basic = basic
+      this.daily_forecast = daily_forecast
+      this.lifestyle = lifestyle
+      this.now = now
+      // '../../images/cloud.jpg')
+      this.now.image = require("../../images/" + this.now.cond_code + '.png')
+      console.log(this.now.image)
+      this.today = daily_forecast[0]
+      this.today.image = require("../../images/" + this.today.cond_code_n + '.png')
+      this.tomorrow = daily_forecast[1]
+      this.tomorrow.image = require("../../images/" + this.tomorrow.cond_code_n + '.png')
+      
+      // console.table({hourly, basic, daily_forecast, lifestyle, now})
+      
+
+      // console.log({hourly, daily, current, lifeStyle, oneWord, effect});
+      // this.current = now
+      
+      // const {backgroundColor, backgroundImage} = current
+
+      // const _today = daily[0],
+      //   _tomorrow = daily[1]
+      // const today = {
+      //   temp: `${_today.minTemp}/${_today.maxTemp}°`,
+      //   icon: _today.dayIcon,
+      //   weather: _today.day
+      // }
+      // const tomorrow = {
+      //   temp: `${_tomorrow.minTemp}/${_tomorrow.maxTemp}°`,
+      //   icon: _tomorrow.dayIcon,
+      //   weather: _tomorrow.day
+      // }
     },
     getLocation (e) {
       // sbDkbxiNZeOTOw8da0qlceLOfyv899OE
@@ -156,34 +261,63 @@ export default {
       })
       const ak = 'sbDkbxiNZeOTOw8da0qlceLOfyv899OE'
       const url = 'http://api.map.baidu.com/geocoder/v2/'
-      wx.getLocation({
-        success: (geo) => {
-          wx.request({
-            url,
-            data: {
-              location: `${geo.latitude},${geo.longitude}`,
-              output: 'json',
-              ak
-            },
-            success: (res) => {
-              if (res.data.status === 0) {
-                let {formatted_address, addressComponent} = res.data.result
-                let {province, city, district: county} = addressComponent
-                this.formatted_address = formatted_address
-                this.province = province
-                this.city = city
-                this.county = county
-                console.log(this.formatted_address, this.province, this.city, this.county)
-              } else {
-                // this.location = '未知地点'
-                this.openLocation()
-              }
-              wx.hideLoading()
-              this.getWeatherData()
+      if(e){
+        wx.request({
+          url,
+          data: {
+            location: `${e.latitude},${e.longitude}`,
+            output: 'json',
+            ak
+          },
+          success: (res) => {
+            if (res.data.status === 0) {
+              let {formatted_address, addressComponent} = res.data.result
+              let {province, city, district: county} = addressComponent
+              this.formatted_address = formatted_address
+              this.province = province
+              this.city = city
+              this.county = county
+              console.log(this.formatted_address, this.province, this.city, this.county)
+            } else {
+              this.openLocation()
             }
-          })
-        }
-      })
+            wx.hideLoading()
+            this.getWeatherData()
+          }
+        })
+      }else{
+        wx.getLocation({
+          success: (geo) => {
+            wx.request({
+              url,
+              data: {
+                location: `${geo.latitude},${geo.longitude}`,
+                output: 'json',
+                ak
+              },
+              success: (res) => {
+                if (res.data.status === 0) {
+                  this.latitude = geo.latitude
+                  this.longitude = geo.longitude
+                  let {formatted_address, addressComponent} = res.data.result
+                  let {province, city, district: county} = addressComponent
+                  this.formatted_address = formatted_address
+                  this.province = province
+                  this.city = city
+                  this.county = county
+                  console.log(this.formatted_address, this.province, this.city, this.county)
+                } else {
+                  // this.location = '未知地点'
+                  this.openLocation()
+                }
+                wx.hideLoading()
+                this.getWeatherData()
+              }
+            })
+          }
+        })
+      }
+
 
     },
     // 检测到失败，则提示用户打开位置权限
@@ -221,7 +355,9 @@ export default {
       }
     },
     formatWeeklyDate(i) {
-      var now = new Date().getDate
+      var now = new Date()
+      var WEEK_NAME = ['周一', '周二', '周三', '周四', '周五', '周六', '周日', '周一', '周二', '周三', '周四', '周五', '周六', '周日']
+      console.log('now', now)
       var names = ['今天', '明天', '后天']
       if (names[i]) {
         return names[i]
@@ -251,6 +387,15 @@ export default {
       city: '',
       county: '',
       paddingTop: '',
+      latitude: '',
+      longitude: '',
+      hourly: {}, 
+      basic: {}, 
+      daily_forecast: [], 
+      lifestyle: {}, 
+      today: {},
+      tomorrow: {},
+      now: {},
       "air": {
         "status": 0,
         "aqi": "77",
@@ -319,22 +464,16 @@ export default {
     }
   },
   mounted(){
-    // wx.setNavigationBarTitle({
-    //   title: '天气情况'
-    // })
-    // wx.setNavigationBarColor({
-    //   frontColor: '#ffffff',
-    //   backgroundColor: '#4231ee',
-    //   animation: {
-    //     duration: 400,
-    //     timingFunc: 'easeIn'
-    //   }
-    // })
     wx.getSystemInfo({
       success: (res) => {
         this.paddingTop = res.statusBarHeight + 12
       }
     })
+  },
+  onPullDownRefresh() {
+    this.getWeatherData()
+    wx.stopPullDownRefresh()
+
   }
   
 }
@@ -343,8 +482,26 @@ export default {
   @import "./weather.scss";
 </style>
 <style lang="scss" scoped>
-
-
+img{
+  width: 34rpx;
+  height: 34rpx;
+}
+.cur-weather{
+  img{
+    margin-right: 10rpx;
+    display:inline-block;
+  }
+}
+.two-days{
+  img {
+    float: right;
+  }
+}
+.hourly {
+  img {
+    margin: 30rpx auto 30rpx;
+  }
+}
 </style>
 
 

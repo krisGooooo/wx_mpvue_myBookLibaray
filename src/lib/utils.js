@@ -158,10 +158,10 @@ export const getChartData = (data) => {
     minData = []
 
   if (data && data.length) {
-    data.forEach(({date, maxTemp, minTemp}) => {
+    data.forEach(({date, tmp_min, tmp_max}) => {
       dates.push(date)
-      maxData.push(maxTemp)
-      minData.push(minTemp)
+      maxData.push(tmp_max)
+      minData.push(tmp_min)
     })
   }
   return {

@@ -82,15 +82,18 @@
                 <view class="day">{{ item.formatDay }}</view>
                 <view class="date">{{ item.formatDate }}</view>
                 <view class="daytime">
-                  <view class="wt">{{item.day}}</view>
+                  <view class="wt">{{item.cond_txt_d}}</view>
                   <!-- <Icon :type="item.dayIcon" otherType="week"></Icon> -->
+                  <img :src="item.dayImage">
+
                 </view>
                 <view class="night">
                   <!-- <Icon :type="item.nightIcon" otherType="week"></Icon> -->
-                  <view class="wt">{{item.night}}</view>
+                  <img :src="item.nightImage">
+                  <view class="wt">{{item.cond_txt_n}}</view>
                 </view>
-                <view class="wind">{{ item.formatNightWind }}</view>
-                <view class="wind" v-if="item.nightWind">{{ item.formatNightWindLevel }}</view>
+                <view class="wind">{{ item.wind_dir }}</view>
+                <view class="wind" v-if="item.nightWind">{{ item.wind_sc + '级' }}</view>
                 <view class="wind" v-else></view>
               </view>
             </view>
@@ -102,12 +105,12 @@
       <view class="container">
         <view class="life-style">
           <!--生活指数-->
-          <view class="item" v-for="(item, index) in lifeStyle" :key="index" @click="indexDetail">
+          <view class="item" v-for="(item, index) in lifestyle" :key="index" @click="indexDetail(item.name, item.txt)">
             <view class="title">
               <!-- <Icon :type="item.icon" otherType="life-style"></Icon> -->
               {{item.name}}
             </view>
-            <view class="content">{{item.info}}</view>
+            <view class="content">{{item.brf}}</view>
           </view>
         </view>
       </view>
@@ -117,8 +120,8 @@
 <script>
 import Icon from '@/components/Icon.vue'
 import { log } from 'util';
-// import {fixChart, getChartConfig, drawEffect} from '@/lib/utils'
-// import Chart from '@/lib/chartjs/chart'
+import {fixChart, getChartConfig, drawEffect} from '@/lib/utils'
+import Chart from '@/lib/chartjs/chart'
 
 export default {
   components:{
@@ -135,6 +138,9 @@ export default {
       return this.daily_forecast.map((item, index) => {
         item.formatDay = this.formatWeeklyDate(index);
         item.formatDate = this.formatDate(item.date);
+        item.dayImage = require("../../images/" + item.cond_code_d + '.png')
+        item.nightImage = require("../../images/" + item.cond_code_n + '.png')
+
         return item;
       });
     }
@@ -144,37 +150,49 @@ export default {
     this.getLocation()
   },
   methods:{
-    // drawChart() {
-    //   const {width, scale, weeklyData} = this.data
-    //   let height = CHART_CANVAS_HEIGHT * scale
-    //   let ctx = wx.createCanvasContext('chart')
-    //   fixChart(ctx, width, height)
+    indexDetail(name, txt) {
+      wx.showModal({
+        title: name,
+        content: txt,
+        showCancel: false
+      })
+    },
+    drawChart() {
+      const EFFECT_CANVAS_HEIGHT = 768 / 2
+      const CHART_CANVAS_HEIGHT = 272 / 2
 
-    //   // 添加温度
-    //   Chart.pluginService.register({
-    //     afterDatasetsDraw(e, t) {
-    //       ctx.setTextAlign('center')
-    //       ctx.setTextBaseline('middle')
-    //       ctx.setFontSize(16)
+      let height = CHART_CANVAS_HEIGHT * this.scale
+      let ctx = wx.createCanvasContext('chart')
+      console.log(ctx, this.width, height);
+      
+      fixChart(ctx, this.width, height)
 
-    //       e.data.datasets.forEach((t, a) => {
-    //         let r = e.getDatasetMeta(a)
-    //         r.hidden ||
-    //           r.data.forEach((e, r) => {
-    //             // 昨天的数据发灰
-    //             ctx.setFillStyle(r === 0 ? '#e0e0e0' : '#ffffff')
-    //             // 增加温度符号
-    //             let i = t.data[r].toString() + '\xb0'
-    //             let o = e.tooltipPosition()
-    //             // 计算文字位置
-    //             0 == a ? ctx.fillText(i, o.x + 2, o.y - 8 - 10) : 1 == a && ctx.fillText(i, o.x + 2, o.y + 8 + 10)
-    //           })
-    //       })
-    //     }
-    //   })
+      // 添加温度
+      Chart['pluginService'].register({
+        afterDatasetsDraw(e, t) {
+          ctx.setTextAlign('center')
+          ctx.setTextBaseline('middle')
+          ctx.setFontSize(16)
+          
+          e.data.datasets.forEach((t, a) => {
+            let r = e.getDatasetMeta(a)
+            r.hidden ||
+              r.data.forEach((e, r) => {
+                // 昨天的数据发灰
+                ctx.setFillStyle(r === 0 ? '#e0e0e0' : '#ffffff')
+                // 增加温度符号
+                
+                let i = t.data[r].toString() + '\xb0'
+                let o = e.tooltipPosition()
+                // 计算文字位置
+                0 == a ? ctx.fillText(i, o.x + 2, o.y - 8 - 10) : 1 == a && ctx.fillText(i, o.x + 2, o.y + 8 + 10)
+              })
+          })
+        }
+      })
 
-    //   return new Chart(ctx, getChartConfig(weeklyData))
-    // },
+      return new Chart(ctx, getChartConfig(this.daily_forecast))
+    },
     backHome() {
       wx.reLaunch({
         url: '../index/index',
@@ -223,35 +241,18 @@ export default {
       this.basic = basic
       this.daily_forecast = daily_forecast
       this.lifestyle = lifestyle
+      const nameArr = ['舒适度','穿衣','感冒','运动','旅游', '紫外线强度', '洗车', '污染扩散']
+      this.lifestyle.map((item, index) => {
+        item.name = nameArr[index]
+      })
       this.now = now
-      // '../../images/cloud.jpg')
       this.now.image = require("../../images/" + this.now.cond_code + '.png')
-      console.log(this.now.image)
       this.today = daily_forecast[0]
       this.today.image = require("../../images/" + this.today.cond_code_n + '.png')
       this.tomorrow = daily_forecast[1]
       this.tomorrow.image = require("../../images/" + this.tomorrow.cond_code_n + '.png')
-      
-      // console.table({hourly, basic, daily_forecast, lifestyle, now})
-      
+      this.drawChart()
 
-      // console.log({hourly, daily, current, lifeStyle, oneWord, effect});
-      // this.current = now
-      
-      // const {backgroundColor, backgroundImage} = current
-
-      // const _today = daily[0],
-      //   _tomorrow = daily[1]
-      // const today = {
-      //   temp: `${_today.minTemp}/${_today.maxTemp}°`,
-      //   icon: _today.dayIcon,
-      //   weather: _today.day
-      // }
-      // const tomorrow = {
-      //   temp: `${_tomorrow.minTemp}/${_tomorrow.maxTemp}°`,
-      //   icon: _tomorrow.dayIcon,
-      //   weather: _tomorrow.day
-      // }
     },
     getLocation (e) {
       // sbDkbxiNZeOTOw8da0qlceLOfyv899OE
@@ -357,7 +358,6 @@ export default {
     formatWeeklyDate(i) {
       var now = new Date()
       var WEEK_NAME = ['周一', '周二', '周三', '周四', '周五', '周六', '周日', '周一', '周二', '周三', '周四', '周五', '周六', '周日']
-      console.log('now', now)
       var names = ['今天', '明天', '后天']
       if (names[i]) {
         return names[i]
@@ -370,7 +370,6 @@ export default {
       var date = new Date(ts)
       var month = ('00' + (date.getMonth() + 1)).slice(-2)
       var day = ('00' + date.getDate()).slice(-2)
-      console.log(month + '/' + day);
       
       return month + '/' + day
     },
@@ -392,10 +391,12 @@ export default {
       hourly: {}, 
       basic: {}, 
       daily_forecast: [], 
-      lifestyle: {}, 
+      lifestyle: [], 
       today: {},
       tomorrow: {},
       now: {},
+      scale: '',
+      width: '',
       "air": {
         "status": 0,
         "aqi": "77",
@@ -466,6 +467,11 @@ export default {
   mounted(){
     wx.getSystemInfo({
       success: (res) => {
+        let width = res.windowWidth
+        let scale = width / 375
+        this.scale = scale
+        this.width = width
+
         this.paddingTop = res.statusBarHeight + 12
       }
     })
@@ -500,6 +506,12 @@ img{
 .hourly {
   img {
     margin: 30rpx auto 30rpx;
+  }
+}
+.week{
+  img {
+    display: block;
+    margin: 0 auto;
   }
 }
 </style>

@@ -3,7 +3,7 @@
  * @Description: 图书页
  * @Date: 2018-11-28 23:04:09
  * @LastEditors: krisGooooo
- * @LastEditTime: 2019-02-27 19:06:47
+ * @LastEditTime: 2019-03-10 19:39:51
  -->
 <template>
     <div>
@@ -21,6 +21,7 @@
 import { get } from '@/util'
 import Card from '@/components/Card'
 import TopSwiper from '@/components/TopSwiper'
+import { log } from 'util';
 
 export default {
   components: {
@@ -45,6 +46,7 @@ export default {
       //  打开 wx 导航栏的loading
       wx.showNavigationBarLoading()
       const book = await get('/weapp/booklist', { page: this.page })
+      console.log(book)
       if (book.list.length < 10 && this.page > 0) {
         this.more = false
       }
